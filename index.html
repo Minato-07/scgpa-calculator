@@ -1,155 +1,548 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CGPA Calculator</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CG Calculator</title>
   <style>
-    * {
-      box-sizing: border-box;
+    :root{
+      --bg:#f7f8fb;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#6b7280;
+      --accent:#2563eb;
+      --accent-2:#10b981;
+      --glass: rgba(255,255,255,0.6);
+      --radius:14px;
+      --shadow: 0 6px 18px rgba(15,23,42,0.08);
+    }
+    [data-theme="dark"]{
+      --bg:#111521;
+      --card:#111827; /* dark gray card */
+      --text:#e6eef8;
+      --muted:#9aa6b2;
+      --accent:#60a5fa;
+      --accent-2:#34d399;
+      --glass: rgba(255,255,255,0.04);
+      --shadow: 0 8px 30px rgba(2,6,23,0.6);
     }
 
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #1e1e2f;
-      color: #f1f1f1;
-      padding: 30px;
-      margin: 0;
-    }
+    *{box-sizing:border-box}
+    body{font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",Arial; background:var(--bg); color:var(--text); margin:0; padding:28px; -webkit-font-smoothing:antialiased}
 
-    h1 {
-      text-align: center;
-      color: #00c9a7;
-      margin-bottom: 30px;
-    }
+    .container{max-width:980px;margin:0 auto}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    h1{font-size:20px;margin:0}
+    .sub{color:var(--muted);font-size:13px}
 
-    label {
-      display: block;
-      margin-bottom: 10px;
-      font-weight: 500;
-    }
+    .controls{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px}
+    select,input[type="number"],button{padding:10px 12px;border-radius:10px;border:1px solid rgba(15,23,42,0.06);background:var(--card);color:var(--text);min-width:160px}
+    [data-theme="dark"] select,[data-theme="dark"] input[type="number"], [data-theme="dark"] button{border:1px solid rgba(255,255,255,0.04)}
 
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      background-color: #2e2e3e;
-      color: #fff;
-    }
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-top:16px}
+    .grid{display:grid;grid-template-columns:1fr 320px;gap:18px}
+    @media (max-width:880px){.grid{grid-template-columns:1fr}}
 
-    .container {
-      max-width: 600px;
-      margin: auto;
-      background: #2a2a3d;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 0 15px rgba(0, 255, 180, 0.1);
-    }
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px;text-align:left;border-bottom:1px dashed rgba(0,0,0,0.06)}
+    [data-theme="dark"] th, [data-theme="dark"] td{border-bottom:1px dashed rgba(255,255,255,0.03)}
+    th{font-size:13px;color:var(--muted)}
 
-    .course-input {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
+    .course-name{font-weight:600;font-size:14px}
+    .small{font-size:13px;color:var(--muted)}
 
-.course-input label {
-  flex: 1;
-  min-width: 45%;
-}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    button.primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white;border:none}
+    button.ghost{background:transparent;border:1px solid rgba(15,23,42,0.06)}
+    [data-theme="dark"] button.ghost{border:1px solid rgba(255,255,255,0.06)}
 
+    .result{font-size:18px;font-weight:700;margin-top:10px}
+    .muted{color:var(--muted)}
 
-    button {
-      padding: 12px 20px;
-      background-color: #00c9a7;
-      color: #1e1e2f;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 16px;
-      transition: background-color 0.3s;
-      width: 100%;
-      margin-top: 20px;
-    }
+    .theme-toggle{display:flex;align-items:center;gap:8px}
+    .theme-toggle input{width:40px;height:24px;appearance:none;background:rgba(255,255,255,0.06);border-radius:999px;position:relative;outline:none;border:1px solid rgba(0,0,0,0.06)}
+    .theme-toggle input:checked{background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+    .theme-toggle input::after{content:"";position:absolute;width:18px;height:18px;border-radius:50%;top:2px;left:2px;background:white;transition:all .2s}
+    [data-theme="dark"] .theme-toggle input::after{background:var(--card)}
+    .theme-toggle input:checked::after{transform:translateX(16px)}
 
-    button:hover {
-      background-color: #00b093;
-    }
+    .footer{margin-top:12px;color:var(--muted);font-size:13px}
 
-    #result {
-      text-align: center;
-      margin-top: 30px;
-      font-size: 22px;
-      font-weight: bold;
-      color: #4dffca;
-    }
+    /* input number styling inside table */
+    .cg-input{width:88px;padding:8px;border-radius:8px;border:1px solid rgba(15,23,42,0.06);background:transparent}
+    [data-theme="dark"] .cg-input{border:1px solid rgba(255,255,255,0.04)}
+
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:var(--glass);font-weight:600}
+
+    .small-note{font-size:13px;color:var(--muted);margin-top:8px}
+
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>SCGPA Calculator</h1>
+  <div class="container" id="root">
+    <header>
+      <div>
+        <h1>CG Calculator</h1>
+        <div class="sub">CSE &amp; ME — All semesters included</div>
+      </div>
 
-    <label>Number of courses:
-      <input type="number" id="courseCount" min="1" required>
-    </label>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="theme-toggle">
+          <label class="small muted">Dark Gray</label>
+          <input id="themeSwitch" type="checkbox" aria-label="Toggle theme">
+        </div>
+        <div class="small muted"></div>
+      </div>
+    </header>
 
-    <label>Total semester credit:
-      <input type="number" id="totalCredit" step="0.01" required>
-    </label>
+    <div class="card">
+      <div class="controls">
+        <select id="departmentSelect">
+          <option value="">Select Department</option>
+          <option value="CSE">Computer Science &amp; Engineering</option>
+          <option value="ME">Mechanical Engineering</option>
+        </select>
 
-    <button onclick="generateInputs()">Next</button>
+        <select id="semesterSelect">
+          <option value="">Select Semester</option>
+        </select>
 
-    <div id="courseInputs"></div>
+        <div style="flex:1"></div>
 
-    <button id="calcButton" onclick="calculateCGPA()" style="display:none;">Calculate SGPA</button>
+        <div class="small muted">Semester totals and credits are preloaded</div>
+      </div>
 
-    <div id="result"></div>
+      <div class="grid">
+        <div>
+          <div id="coursesArea" style="min-height:120px;margin-top:10px"></div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+            <div>
+              <button class="primary" id="calcBtn">Calculate Semester CG</button>
+              <button class="ghost" id="addToListBtn">Add Semester CG to list</button>
+            </div>
+            <div style="text-align:right">
+              <div class="small-note">Semester CG: <span id="semesterCGDisplay" class="pill">--</span></div>
+              <div class="small-note">Semester Credits: <span id="semesterCredits" class="pill">--</span></div>
+            </div>
+          </div>
+
+          <div class="small-note">Tip: fill only the courses you have grades for; unfilled courses will be ignored in calculation.</div>
+        </div>
+
+        <aside>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <strong>Overall CG</strong>
+            <div class="small muted">Choose method</div>
+          </div>
+
+          <div style="margin-top:10px;display:flex;gap:8px">
+            <button class="ghost" id="simpleAvgBtn">Simple Avg</button>
+            <button class="ghost" id="weightedAvgBtn">Weighted Avg</button>
+          </div>
+
+          <div style="margin-top:12px">
+            <label class="small muted">Previous semesters CGs (comma separated):</label>
+            <input id="prevCGs" placeholder="e.g. 3.25,3.5,3.75" style="width:100%;margin-top:8px;padding:10px;border-radius:10px;border:1px solid rgba(15,23,42,0.06);background:var(--card);color:var(--text)">
+          </div>
+
+          <div style="margin-top:12px">
+            <button class="primary" id="calcOverallBtn">Calculate Overall CG</button>
+          </div>
+
+          <div style="margin-top:12px">
+            <div class="muted">Current stored semesters:</div>
+            <div id="storedList" style="margin-top:8px"></div>
+            <div style="margin-top:8px;display:flex;gap:8px">
+              <button class="ghost" id="clearStored">Clear</button>
+            </div>
+          </div>
+
+          <div class="result" id="overallResult">--</div>
+          <div class="footer">Simple Avg = arithmetic mean of semester CGs. Weighted Avg = average weighted by semester credits.</div>
+        </aside>
+      </div>
+
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <strong>How to use</strong>
+      <ol style="margin-top:8px;color:var(--muted)">
+        <li>Select department and semester.</li>
+        <li>Enter CG (0.00 - 4.00) for each course and click <strong>Calculate Semester CG</strong>.</li>
+        <li>Optionally click <strong>Add Semester CG to list</strong> to store it for overall calculation.</li>
+        <li>Use previous semesters input or stored list to compute overall CG.</li>
+      </ol>
+    </div>
+
   </div>
 
   <script>
-    function generateInputs() {
-      const count = parseInt(document.getElementById("courseCount").value);
-      const container = document.getElementById("courseInputs");
-      container.innerHTML = "";
+    // ---------- Course data (filled for both departments, 1-1 .. 4-2) ----------
+    const courseData = {
+      "CSE": {
+        "1-1": [
+          {name:"Computer Fundamentals and Ethics Sessional",credit:0.75},
+          {name:"Structured Programming",credit:3.00},
+          {name:"Structured Programming Sessional",credit:1.50},
+          {name:"Basic Electrical Engineering",credit:3.00},
+          {name:"Basic Electrical Engineering Sessional",credit:0.75},
+          {name:"Differential and Integral Calculus",credit:3.00},
+          {name:"Functional English",credit:3.00},
+          {name:"Functional English Sessional",credit:0.75},
+          {name:"Inorganic and Physical Chemistry",credit:3.00},
+          {name:"Inorganic and Physical Chemistry Sessional",credit:0.75}
+        ],
+        "1-2": [
+          {name:"Competitive Programming Sessional",credit:0.75},
+          {name:"Data Structure",credit:3.00},
+          {name:"Data Structure Sessional",credit:1.50},
+          {name:"Object Oriented Programming",credit:3.00},
+          {name:"Object Oriented Programming Sessional",credit:1.50},
+          {name:"Electronic Devices and Circuits",credit:3.00},
+          {name:"Electronic Devices and Circuits Sessional",credit:1.50},
+          {name:"Coordinate Geometry and Ordinary Differential Equation",credit:3.00},
+          {name:"Physics",credit:3.00},
+          {name:"Physics Sessional",credit:0.75}
+        ],
+        "2-1": [
+          {name:"Software Development Project I",credit:0.75},
+          {name:"Discrete Mathematics",credit:3.00},
+          {name:"Discrete Mathematics Sessional",credit:1.50},
+          {name:"Digital Logic Design",credit:3.00},
+          {name:"Digital Logic Design Sessional",credit:1.50},
+          {name:"Electrical Drives and Instrumentations",credit:3.00},
+          {name:"Electrical Drives and Instrumentations Sessional",credit:0.75},
+          {name:"Vector Analysis and Linear Algebra",credit:3.00},
+          {name:"Economics, Government and Sociology",credit:3.00}
+        ],
+        "2-2": [
+          {name:"Technical Writing and Presentation Sessional",credit:0.75},
+          {name:"Algorithm Analysis and Design",credit:3.00},
+          {name:"Algorithm Analysis and Design Sessional",credit:1.50},
+          {name:"Numerical Methods",credit:3.00},
+          {name:"Numerical Methods Sessional",credit:0.75},
+          {name:"Microprocessors, Microcontrollers and Assembly Language",credit:3.00},
+          {name:"Microprocessors ... Sessional",credit:1.50},
+          {name:"Complex Variable, PDE and Harmonic Analysis",credit:3.00},
+          {name:"Industrial Management and Accountancy",credit:3.00}
+        ],
+        "3-1": [
+          {name:"Web Based Application Project",credit:0.75},
+          {name:"Database Systems",credit:3.00},
+          {name:"Database Systems Sessional",credit:1.50},
+          {name:"Theory of Computation",credit:3.00},
+          {name:"Computer Interfacing and Embedded System",credit:3.00},
+          {name:"Computer Interfacing ... Sessional",credit:0.75},
+          {name:"Computer Architecture",credit:3.00},
+          {name:"Computer Architecture Sessional",credit:0.75},
+          {name:"Applied Statistics and Queuing Theory",credit:3.00}
+        ],
+        "3-2": [
+          {name:"Software Development Project II",credit:0.75},
+          {name:"Operating Systems",credit:3.00},
+          {name:"Operating Systems Sessional",credit:0.75},
+          {name:"Data Communication",credit:3.00},
+          {name:"Data Communication Sessional",credit:0.75},
+          {name:"Software Engineering",credit:3.00},
+          {name:"Software Engineering Sessional",credit:0.75},
+          {name:"Artificial Intelligence",credit:3.00},
+          {name:"Artificial Intelligence Sessional",credit:0.75},
+          {name:"Digital Signal Processing",credit:3.00},
+          {name:"Digital Signal Processing Sessional",credit:0.75}
+        ],
+        "4-1": [
+          {name:"Project/Thesis I",credit:1.00},
+          {name:"Compiler Design",credit:3.00},
+          {name:"Compiler Design Sessional",credit:0.75},
+          {name:"Computer Networks",credit:3.00},
+          {name:"Computer Networks Sessional",credit:1.50},
+          {name:"Digital Image Processing",credit:3.00},
+          {name:"Digital Image Processing Sessional",credit:0.75},
+          {name:"Industrial Attachment",credit:0.75},
+          {name:"Optional I Theory",credit:3.00},
+          {name:"Optional I Sessional",credit:0.75},
+          {name:"Optional II Theory",credit:3.00},
+          {name:"Optional II Sessional",credit:0.75}
+        ],
+        "4-2": [
+          {name:"Project/Thesis II",credit:3.00},
+          {name:"Computer Graphics",credit:3.00},
+          {name:"Computer Graphics Sessional",credit:0.75},
+          {name:"Machine Learning",credit:3.00},
+          {name:"Machine Learning Sessional",credit:0.75},
+          {name:"Security and Privacy",credit:3.00},
+          {name:"Security and Privacy Sessional",credit:0.75},
+          {name:"Seminar",credit:0.75},
+          {name:"Optional III",credit:3.00},
+          {name:"Optional IV",credit:3.00}
+        ]
+      },
 
-      for (let i = 0; i < count; i++) {
-        container.innerHTML += `
-          <div class="course-input">
-            <label>Course ${i + 1} Credit:
-              <input type="number" step="0.01" id="credit${i}" required>
-            </label>
-            <label>Course ${i + 1} CG:
-              <input type="number" step="0.01" id="cg${i}" required>
-            </label>
-          </div>
-        `;
+      "ME": {
+        "1-1": [
+          {name:"Chemistry",credit:3.00},
+          {name:"Physics",credit:3.00},
+          {name:"Economics and Sociology",credit:3.00},
+          {name:"Differential Calculus and Geometry",credit:3.00},
+          {name:"Basic Mechanical Engineering",credit:3.00},
+          {name:"Chemistry Sessional",credit:0.75},
+          {name:"Physics Sessional",credit:0.75},
+          {name:"Basic Mechanical Engineering Sessional",credit:0.75},
+          {name:"Mechanical Engineering Drawing",credit:1.50},
+          {name:"Shop Practice",credit:0.75}
+        ],
+        "1-2": [
+          {name:"Technical English",credit:3.00},
+          {name:"Vector, Matrix and Integral Calculus",credit:3.00},
+          {name:"Computer and Programming Language",credit:3.00},
+          {name:"Electrical Circuits",credit:3.00},
+          {name:"Production Process",credit:3.00},
+          {name:"Technical English Sessional",credit:1.00},
+          {name:"Computer and Programming Language Sessional",credit:1.50},
+          {name:"Electrical Circuits Sessional",credit:0.75},
+          {name:"Production Process Sessional",credit:1.50}
+        ],
+        "2-1": [
+          {name:"Accounting and Industrial Law",credit:3.00},
+          {name:"Differential Equation, Complex Variable and Harmonic Analysis",credit:4.00},
+          {name:"Thermodynamics",credit:3.00},
+          {name:"Engineering Mechanics-I",credit:3.00},
+          {name:"Fluid Mechanics-I",credit:3.00},
+          {name:"Thermodynamics Sessional",credit:1.50},
+          {name:"Fluid Mechanics-I Sessional",credit:1.50},
+          {name:"Computer Aided Drawing",credit:1.50}
+        ],
+        "2-2": [
+          {name:"Numerical Analysis and Statistics",credit:3.00},
+          {name:"Electrical Machines and Electronics",credit:3.00},
+          {name:"Engineering Mechanics-II",credit:3.00},
+          {name:"Measurement, Quality Control and Materials Handling",credit:3.00},
+          {name:"Mechanics of Solids",credit:3.00},
+          {name:"Electrical Machines and Electronics Sessional",credit:1.50},
+          {name:"Numerical Analysis and Statistics Sessional",credit:1.50},
+          {name:"Engineering Mechanics-II Sessional",credit:0.75},
+          {name:"Measurement... Sessional",credit:0.75},
+          {name:"Mechanics of Solids Sessional",credit:0.75}
+        ],
+        "3-1": [
+          {name:"Heat Transfer-I",credit:3.00},
+          {name:"Fluid Mechanics-II",credit:3.00},
+          {name:"Design of Machine Elements-I",credit:3.00},
+          {name:"Instrumentation and Control",credit:3.00},
+          {name:"Engineering Materials and Metallurgy",credit:4.00},
+          {name:"Fluid Mechanics-II Sessional",credit:0.75},
+          {name:"Design of Machine Elements-I Sessional",credit:0.75},
+          {name:"Instrumentation and Control Sessional",credit:0.75},
+          {name:"Engineering Materials and Metallurgy Sessional",credit:0.75}
+        ],
+        "3-2": [
+          {name:"Heat Transfer-II",credit:3.00},
+          {name:"Engineering Mechanics-III",credit:3.00},
+          {name:"Design of Machine Elements-II",credit:3.00},
+          {name:"Energy Engineering & Technology",credit:3.00},
+          {name:"Mechatronic Systems",credit:3.00},
+          {name:"Heat Transfer-II Sessional",credit:1.50},
+          {name:"Engineering Mechanics-III Sessional",credit:0.75},
+          {name:"Design of Machine Elements-II Sessional",credit:1.50},
+          {name:"Case Study in Mechanical Engineering",credit:1.00},
+          {name:"Mechatronic Systems Sessional",credit:0.75}
+        ],
+        "4-1": [
+          {name:"Applied Thermodynamics-I",credit:3.00},
+          {name:"Refrigeration and Mechanical Equipment in Buildings",credit:3.00},
+          {name:"Production Planning and Control",credit:3.00},
+          {name:"Power Plant Engineering",credit:3.00},
+          {name:"Optional-I Theory",credit:3.00},
+          {name:"Applied Thermodynamics-I Sessional",credit:0.75},
+          {name:"Refrigeration... Sessional",credit:0.75},
+          {name:"Project and Thesis (4th year)",credit:1.50},
+          {name:"Seminar",credit:1.00},
+          {name:"Industrial Training (4 weeks)",credit:1.00}
+        ],
+        "4-2": [
+          {name:"Applied Thermodynamics-II",credit:3.00},
+          {name:"Fluid Machinery",credit:3.00},
+          {name:"Machine Tool and Tool Design",credit:3.00},
+          {name:"Industrial Management",credit:3.00},
+          {name:"Optional-II Theory",credit:3.00},
+          {name:"Fluid Machinery Sessional",credit:0.75},
+          {name:"Machine Tool and Tool Design Sessional",credit:0.75},
+          {name:"Project and Thesis (4th year)",credit:3.00},
+          {name:"Seminar",credit:1.00}
+        ]
       }
+    };
 
-      document.getElementById("calcButton").style.display = "block";
+    // ---------- Helper & UI code ----------
+    const deptSel = document.getElementById('departmentSelect');
+    const semSel = document.getElementById('semesterSelect');
+    const coursesArea = document.getElementById('coursesArea');
+    const calcBtn = document.getElementById('calcBtn');
+    const semesterCGDisplay = document.getElementById('semesterCGDisplay');
+    const semesterCreditsDisplay = document.getElementById('semesterCredits');
+    const addToListBtn = document.getElementById('addToListBtn');
+    const storedListDiv = document.getElementById('storedList');
+    const prevCGsInput = document.getElementById('prevCGs');
+    const calcOverallBtn = document.getElementById('calcOverallBtn');
+    const overallResult = document.getElementById('overallResult');
+    const simpleAvgBtn = document.getElementById('simpleAvgBtn');
+    const weightedAvgBtn = document.getElementById('weightedAvgBtn');
+    const clearStoredBtn = document.getElementById('clearStored');
+
+    let selectedDept = null;
+    let selectedSem = null;
+    let lastSemesterCredits = 0;
+    let lastSemesterCG = null;
+    let store = JSON.parse(localStorage.getItem('cg_store')||'[]');
+
+    function populateSemesters(dept){
+      semSel.innerHTML = '<option value="">Select Semester</option>';
+      Object.keys(courseData[dept]).forEach(k=>{
+        semSel.innerHTML += `<option value="${k}">${k}</option>`;
+      });
     }
 
-    function calculateCGPA() {
-      const count = parseInt(document.getElementById("courseCount").value);
-      const totalCredit = parseFloat(document.getElementById("totalCredit").value);
-      let sum = 0;
+    deptSel.addEventListener('change', e=>{
+      selectedDept = e.target.value;
+      if(!selectedDept){ coursesArea.innerHTML=''; semSel.innerHTML='<option value="">Select Semester</option>'; return; }
+      populateSemesters(selectedDept);
+      coursesArea.innerHTML='';
+      semesterCGDisplay.textContent='--'; semesterCreditsDisplay.textContent='--';
+    });
 
-      for (let i = 0; i < count; i++) {
-        const credit = parseFloat(document.getElementById(`credit${i}`).value);
-        const cg = parseFloat(document.getElementById(`cg${i}`).value);
-        if (isNaN(credit) || isNaN(cg)) {
-          alert(`Please fill in all values correctly for Course ${i + 1}.`);
-          return;
+    semSel.addEventListener('change', e=>{
+      selectedSem = e.target.value;
+      renderCourses();
+    });
+
+    function renderCourses(){
+      if(!selectedDept || !selectedSem) { coursesArea.innerHTML=''; return; }
+      const list = courseData[selectedDept][selectedSem];
+      let html = `<table><thead><tr><th>Course</th><th>Credit</th><th>CG (0-4)</th></tr></thead><tbody>`;
+      list.forEach((c,i)=>{
+        html += `<tr>
+                  <td class="course-name">${c.name}</td>
+                  <td class="small">${c.credit}</td>
+                  <td><input class="cg-input" type="number" step="0.01" min="0" max="4" id="cg_in_${i}" placeholder="e.g. 3.25"></td>
+                 </tr>`;
+      });
+      html += '</tbody></table>';
+      coursesArea.innerHTML = html;
+      semesterCGDisplay.textContent='--'; semesterCreditsDisplay.textContent= computeSemesterCredits().toFixed(2);
+    }
+
+    function computeSemesterCredits(){
+      if(!selectedDept || !selectedSem) return 0;
+      const sum = courseData[selectedDept][selectedSem].reduce((s,c)=>s + (c.credit||0),0);
+      lastSemesterCredits = sum;
+      return sum;
+    }
+
+    function calculateSemesterCG(){
+      if(!selectedDept || !selectedSem) return alert('Choose department and semester first');
+      const list = courseData[selectedDept][selectedSem];
+      let totalPoints=0; let totalCredits=0; let any=false;
+      list.forEach((c,i)=>{
+        const el = document.getElementById('cg_in_'+i);
+        const val = parseFloat(el && el.value);
+        if(!isNaN(val)){
+          any=true;
+          totalPoints += val * c.credit;
+          totalCredits += c.credit;
         }
-        sum += credit * cg;
-      }
-
-      const sgpa = sum / totalCredit;
-      document.getElementById("result").innerText = `SGPA of this semester is: ${sgpa.toFixed(2)}`;
+      });
+      if(!any) return alert('Enter at least one CG for this semester');
+      const cg = totalPoints / totalCredits;
+      lastSemesterCG = parseFloat(cg.toFixed(2));
+      semesterCGDisplay.textContent = lastSemesterCG.toFixed(2);
+      semesterCreditsDisplay.textContent = totalCredits.toFixed(2);
+      return {cg: lastSemesterCG, credits: totalCredits};
     }
+
+    calcBtn.addEventListener('click', ()=>{ calculateSemesterCG(); });
+
+    addToListBtn.addEventListener('click', ()=>{
+      const res = calculateSemesterCG();
+      if(!res) return;
+      store.push({cg:res.cg, credits: res.credits, dept:selectedDept, semester:selectedSem, time:Date.now()});
+      localStorage.setItem('cg_store', JSON.stringify(store));
+      updateStoredUI();
+      alert('Added semester CG to stored list');
+    });
+
+    function updateStoredUI(){
+      if(store.length===0){ storedListDiv.innerHTML = '<div class="muted">(none)</div>'; return; }
+      let html='';
+      store.forEach((s,i)=>{
+        html += `<div style="margin-bottom:6px"><strong>${s.dept} ${s.semester}</strong> — CG: ${s.cg.toFixed(2)} (cr ${s.credits.toFixed(2)}) <button data-i="${i}" style="margin-left:8px;padding:4px 8px;border-radius:6px;border:1px solid rgba(0,0,0,0.06);background:transparent">Remove</button></div>`;
+      });
+      storedListDiv.innerHTML = html;
+      // attach remove handlers
+      storedListDiv.querySelectorAll('button').forEach(btn=>{
+        btn.addEventListener('click', e=>{
+          const idx = parseInt(e.target.getAttribute('data-i'));
+          store.splice(idx,1);
+          localStorage.setItem('cg_store', JSON.stringify(store));
+          updateStoredUI();
+        });
+      });
+    }
+
+    calcOverallBtn.addEventListener('click', ()=>{
+      // parse prev list from input
+      const raw = prevCGsInput.value.trim();
+      let arr = raw? raw.split(',').map(v=>parseFloat(v.trim())).filter(x=>!isNaN(x)) : [];
+      // include stored list's CG values
+      const storedCGs = store.map(s=>s.cg);
+      const storedCredits = store.map(s=>s.credits);
+      const method = (weightedAvgBtn.classList.contains('active'))? 'weighted' : 'simple';
+
+      if(method==='simple'){
+        const all = arr.concat(storedCGs);
+        if(lastSemesterCG !== null && (!arr.length && !storedCGs.length)){
+          // if user computed a semester just now and no others provided, include it
+          all.push(lastSemesterCG);
+        }
+        if(all.length===0) return alert('No semester CGs provided or stored.');
+        const avg = all.reduce((a,b)=>a+b,0)/all.length;
+        overallResult.textContent = 'Simple Avg: ' + avg.toFixed(2);
+      } else {
+        // weighted average: need credits for each provided stored semester; for numeric-only prev CGs without credits we'll assume equal weight as latest computed semester credits (best-effort)
+        let totalPoints=0, totalCredits=0;
+        // stored ones include credits
+        store.forEach(s=>{ totalPoints += s.cg * s.credits; totalCredits += s.credits; });
+        // arr numeric-only: ask user for credits? — we'll assume lastSemesterCredits if available, otherwise assume 3.0 per semester
+        const assumedCredit = lastSemesterCredits || 3.0;
+        arr.forEach(cg=>{ totalPoints += cg * assumedCredit; totalCredits += assumedCredit; });
+        // include last computed semester if present and not already in store
+        if(lastSemesterCG !== null && !store.some(s=>s.cg===lastSemesterCG && s.semester===selectedSem)){
+          totalPoints += lastSemesterCG * lastSemesterCredits;
+          totalCredits += lastSemesterCredits;
+        }
+        if(totalCredits===0) return alert('No credit data available to compute weighted average.');
+        const wav = totalPoints / totalCredits;
+        overallResult.textContent = 'Weighted Avg: ' + wav.toFixed(2);
+      }
+    });
+
+    // toggle method
+    simpleAvgBtn.addEventListener('click', ()=>{ simpleAvgBtn.classList.add('active'); weightedAvgBtn.classList.remove('active'); simpleAvgBtn.style.borderColor='var(--accent)'; weightedAvgBtn.style.borderColor=''; });
+    weightedAvgBtn.addEventListener('click', ()=>{ weightedAvgBtn.classList.add('active'); simpleAvgBtn.classList.remove('active'); weightedAvgBtn.style.borderColor='var(--accent)'; simpleAvgBtn.style.borderColor=''; });
+
+    clearStoredBtn.addEventListener('click', ()=>{ if(confirm('Clear stored semesters?')){ store = []; localStorage.setItem('cg_store', JSON.stringify(store)); updateStoredUI(); } });
+
+    // theme handling
+    const themeSwitch = document.getElementById('themeSwitch');
+    const root = document.documentElement;
+    const saved = localStorage.getItem('theme') || 'dark';
+    function applyTheme(t){ if(t==='dark'){ root.setAttribute('data-theme','dark'); themeSwitch.checked = true; } else { root.removeAttribute('data-theme'); themeSwitch.checked = false; } localStorage.setItem('theme', t); }
+    applyTheme(saved);
+    themeSwitch.addEventListener('change', ()=>{ applyTheme(themeSwitch.checked? 'dark' : 'light'); });
+
+    // initial UI state
+    updateStoredUI(); simpleAvgBtn.click();
+
   </script>
 </body>
 </html>
